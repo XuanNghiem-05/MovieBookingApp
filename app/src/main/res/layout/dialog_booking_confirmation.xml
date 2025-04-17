@@ -1,0 +1,85 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="24dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tvMovieName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tên phim:"
+        android:textStyle="bold"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/tvStartTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Khởi chiếu:" />
+
+    <TextView
+        android:id="@+id/tvRoom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Phòng chiếu:" />
+
+    <TextView
+        android:id="@+id/tvShowtime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Giờ chiếu:" />
+
+    <TextView
+        android:id="@+id/tvSeats"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ghế đã chọn:" />
+
+    <TextView
+        android:id="@+id/tvTicketCount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Số lượng vé:" />
+
+    <TextView
+        android:id="@+id/tvFood"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Đồ ăn/Đồ uống:" />
+
+    <TextView
+        android:id="@+id/tvPayment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Phương thức thanh toán:" />
+
+    <TextView
+        android:id="@+id/tvTotal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="TỔNG TIỀN THANH TOÁN:" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:layout_marginTop="16dp">
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hủy"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/btnConfirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Xác nhận" />
+
+
+    </LinearLayout>
+</LinearLayout>

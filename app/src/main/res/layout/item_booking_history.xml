@@ -1,0 +1,76 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp"
+    android:layout_marginBottom="8dp"
+    android:background="?android:attr/selectableItemBackground">
+
+    <TextView
+        android:id="@+id/tvTicketId"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Mã vé: "
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tvEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Email: " />
+
+    <TextView
+        android:id="@+id/tvMovieName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Phim: " />
+
+    <TextView
+        android:id="@+id/tvShowDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ngày khởi chiếu: " />
+
+    <TextView
+        android:id="@+id/tvRoom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Phòng: " />
+
+    <TextView
+        android:id="@+id/tvShowTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Giờ chiếu: " />
+
+    <TextView
+        android:id="@+id/tvSeat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ghế: " />
+
+    <TextView
+        android:id="@+id/tvFoodInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Đồ ăn/đồ uống: " />
+
+    <TextView
+        android:id="@+id/tvPaymentMethod"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Phương thức thanh toán: " />
+
+    <TextView
+        android:id="@+id/tvBookingDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ngày đặt:" />
+
+    <TextView
+        android:id="@+id/tvTotalPrice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tổng tiền: " />
+</LinearLayout>

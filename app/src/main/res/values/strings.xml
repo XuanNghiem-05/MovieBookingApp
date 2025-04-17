@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">BTL_ADR_NC</string>
+    <string name="prompt_select_category">Chọn thể loại</string>
+</resources>

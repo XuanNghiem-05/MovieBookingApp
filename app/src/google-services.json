@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "177812639037",
+    "project_id": "btl-ff46d",
+    "storage_bucket": "btl-ff46d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:177812639037:android:96068308aac13fec180954",
+        "android_client_info": {
+          "package_name": "deso1.ngoxuannghiem.btl_adr_nc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNQkSot0ZH1CHyZmMom3KJlEP29H2HURE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

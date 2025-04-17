@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_home"
+        android:icon="@drawable/langman"
+        android:title="Trang chủ" />
+
+    <item
+        android:id="@+id/menu_history"
+        android:icon="@drawable/langman"
+        android:title="Lịch sử" />
+
+    <item
+        android:id="@+id/menu_account"
+        android:icon="@drawable/langman"
+        android:title="Tài khoản" />
+</menu>

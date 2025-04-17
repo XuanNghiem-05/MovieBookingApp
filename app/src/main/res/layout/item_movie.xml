@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:layout_margin="8dp">
+
+    <!-- Phần chính gồm ảnh + thông tin -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- Ảnh phim -->
+        <ImageView
+            android:id="@+id/imgMovie"
+            android:layout_width="0dp"
+            android:layout_height="120dp"
+            android:layout_weight="1"
+            android:scaleType="centerCrop"
+            android:layout_marginEnd="8dp" />
+
+        <!-- Thông tin phim (3 phần: tên, giá, khởi chiếu) -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvMovieName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tên phim"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="#000000" />
+
+            <TextView
+                android:id="@+id/tvMoviePrice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Giá vé: "
+                android:textSize="14sp"
+                android:textColor="#444" />
+
+            <TextView
+                android:id="@+id/tvMovieStartDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Khởi chiếu: "
+                android:textSize="14sp"
+                android:textColor="#444" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Nút Sửa / Xoá -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <Button
+            android:id="@+id/btnEditMovie"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sửa" />
+
+        <Button
+            android:id="@+id/btnDeleteMovie"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Xoá"
+            android:layout_marginStart="8dp"
+            android:textColor="#FF0000" />
+    </LinearLayout>
+
+</LinearLayout>
