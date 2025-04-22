@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.zxing.BarcodeFormat;
@@ -18,7 +21,10 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -30,20 +36,26 @@ public class BookingHistoryAdapter extends RecyclerView.Adapter<BookingHistoryAd
     private List<Booking> bookingList;
     private Map<String, Movie> movieMap;   // movieId -> movieName
     private Map<String, String> showtimeMap;
+    private Map<String, String> movieDateMap;
     private Map<String, String> roomMap;
     private Map<String, String> foodMap;    // foodId -> foodName
+    CardView cardView;
 
     public BookingHistoryAdapter(Context context, List<Booking> bookingList,
                                  Map<String, Movie> movieMap,
+                                 Map<String, String> movieDateMap,
                                  Map<String, String> showtimeMap,
                                  Map<String, String> roomMap,
                                  Map<String, String> foodMap) {
         this.context = context;
         this.bookingList = bookingList;
         this.movieMap = movieMap;
+        this.movieDateMap = movieDateMap;
         this.showtimeMap = showtimeMap;
         this.roomMap = roomMap;
         this.foodMap = foodMap;
+        // Sắp xếp danh sách bookingList theo thời gian đặt vé giảm dần (mới nhất lên đầu)
+        this.bookingList = sortBookingsByTime(bookingList);
     }
 
     @NonNull
@@ -66,11 +78,6 @@ public class BookingHistoryAdapter extends RecyclerView.Adapter<BookingHistoryAd
         holder.tvMovie.setText("Phim: " + movieName);
         holder.tvStartDate.setText("Khởi chiếu: " + startDate);
 
-        // Phòng chiếu - nếu roomId null hoặc rỗng
-//        String roomText = (booking.getRoomId() != null && !booking.getRoomId().isEmpty())
-//                ? booking.getRoomId()
-//                : "Không rõ";
-//        holder.tvRoom.setText("Phòng: " + roomText);
 
         String room = roomMap.getOrDefault(booking.getRoomId(), "Không rõ");
         holder.tvRoom.setText("Phòng chiếu: " + room);
@@ -78,6 +85,55 @@ public class BookingHistoryAdapter extends RecyclerView.Adapter<BookingHistoryAd
         // Giờ chiếu
         String showtime = showtimeMap.getOrDefault(booking.getShowtimeId(), "Không rõ");
         holder.tvShowtime.setText("Giờ chiếu: " + showtime);
+
+        // Ngày chiếu
+        String movieDate = movieDateMap.getOrDefault(booking.getMovieDateId(), "Không rõ");
+        holder.tvMovieDate.setText("Ngày chiếu: " + movieDate);
+
+        // So sánh ngày và giờ chiếu với thời gian hiện tại
+// Chuyển movieDate từ yyyy-MM-dd sang dd/MM/yyyy
+        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        String formattedDate = movieDate;
+        try {
+            Date date = inputFormat.parse(movieDate);
+            if (date != null) {
+                formattedDate = outputFormat.format(date);
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+// Đảm bảo giờ chiếu có định dạng HH:mm (thêm số 0 nếu cần)
+        if (showtime.length() == 4) { // ví dụ "7:00"
+            showtime = "0" + showtime;
+        }
+
+        String dateTimeStr = formattedDate + " " + showtime; // Ví dụ: "20/04/2025 07:00"
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+
+        Date now = new Date(); // thời gian hiện tại
+        Log.d("DEBUG_TIME", "movieDate: " + movieDate + ", showtime: " + showtime + ", dateTimeStr: " + dateTimeStr);
+        Log.d("DEBUG_TIME", "Now: " + sdf.format(now));
+
+        try {
+            Date showDateTime = sdf.parse(dateTimeStr);
+
+            if (showDateTime != null && showDateTime.before(now)) {
+                // Đã chiếu => xám
+                holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.gray_200));
+                Log.d("DEBUG_TIME", "Parsed showDateTime: " + showDateTime + " => ĐÃ chiếu");
+            } else {
+                // Chưa chiếu => trắng
+                holder.itemView.setBackgroundColor(ContextCompat.getColor(context, android.R.color.white));
+                Log.d("DEBUG_TIME", "Parsed showDateTime: " + showDateTime + " => CHƯA chiếu");
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+            // Nếu lỗi, giữ màu trắng mặc định
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, android.R.color.white));
+            Log.e("DEBUG_TIME", "Lỗi parse dateTimeStr: " + dateTimeStr);
+        }
 
         // Ghế và số lượng vé
         List<String> seatList = booking.getSeats();
@@ -121,6 +177,7 @@ public class BookingHistoryAdapter extends RecyclerView.Adapter<BookingHistoryAd
                 + "Ghế: " + booking.getSeats().toString() + "\n"
                 + "Ngày chiếu: " + startDate + "\n"
                 + "Phòng: " + room + "\n"
+                + "Ngày chiếu: " + movieDate + "\n"
                 + "Giờ chiếu: " + showtime + "\n"
                 + "Đồ ăn: " + foodDisplay  + "\n"
                 + "Thanh toán: " + booking.getPaymentMethod() + "\n"
@@ -136,7 +193,7 @@ public class BookingHistoryAdapter extends RecyclerView.Adapter<BookingHistoryAd
     }
 
     public static class BookingViewHolder extends RecyclerView.ViewHolder {
-        TextView tvBookingId, tvMovie, tvRoom, tvShowtime, tvSeats, tvSeatCount, tvFoods, tvPayment, tvBookingTime, tvTotal, tvStartDate;
+        TextView tvBookingId, tvMovie, tvRoom, tvShowtime, tvSeats, tvSeatCount, tvFoods, tvPayment, tvBookingTime, tvTotal, tvStartDate, tvMovieDate;
         ImageView imgQrCode;
         public BookingViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -152,6 +209,7 @@ public class BookingHistoryAdapter extends RecyclerView.Adapter<BookingHistoryAd
             tvBookingTime = itemView.findViewById(R.id.tvBookingDateTime);
             tvTotal = itemView.findViewById(R.id.tvTotal);
             imgQrCode = itemView.findViewById(R.id.imgQrCode);
+            tvMovieDate = itemView.findViewById(R.id.tvMovieDate);
         }
     }
 
@@ -182,5 +240,27 @@ public class BookingHistoryAdapter extends RecyclerView.Adapter<BookingHistoryAd
             e.printStackTrace();
             return null;
         }
+    }
+
+
+    private List<Booking> sortBookingsByTime(List<Booking> bookings) {
+        Collections.sort(bookings, new Comparator<Booking>() {
+            @Override
+            public int compare(Booking booking1, Booking booking2) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+                try {
+                    // Chuyển đổi chuỗi ngày giờ thành đối tượng Date
+                    Date date1 = dateFormat.parse(booking1.getBookingTime());
+                    Date date2 = dateFormat.parse(booking2.getBookingTime());
+
+                    // So sánh các thời gian này theo thứ tự giảm dần (mới nhất lên đầu)
+                    return date2.compareTo(date1);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    return 0; // Nếu không thể phân tích ngày, sẽ không thay đổi thứ tự
+                }
+            }
+        });
+        return bookings;
     }
 }

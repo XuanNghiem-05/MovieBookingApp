@@ -29,11 +29,12 @@ public class BookingHistoryFragment extends Fragment {
     private BookingHistoryAdapter adapter;
     private List<Booking> bookingList = new ArrayList<>();
 
-    private DatabaseReference bookingRef, movieRef, showtimeRef, roomRef, foodRef;
+    private DatabaseReference bookingRef, movieRef, showtimeRef, roomRef, foodRef, movieDateRef;
     private FirebaseAuth auth;
 
     // Map hỗ trợ hiển thị thông tin đầy đủ
     private Map<String, Movie> movieMap = new HashMap<>();
+    private Map<String, String> movieDateMap = new HashMap<>();
     private Map<String, String> showtimeMap = new HashMap<>();
     private Map<String, String> roomMap = new HashMap<>();
     private Map<String, String> foodMap = new HashMap<>();
@@ -49,6 +50,7 @@ public class BookingHistoryFragment extends Fragment {
         auth = FirebaseAuth.getInstance();
         bookingRef = FirebaseDatabase.getInstance().getReference("Bookings");
         movieRef = FirebaseDatabase.getInstance().getReference("Movies");
+        movieDateRef = FirebaseDatabase.getInstance().getReference("MovieDates");
         showtimeRef = FirebaseDatabase.getInstance().getReference("Showtimes");
         roomRef = FirebaseDatabase.getInstance().getReference("Rooms");
         foodRef = FirebaseDatabase.getInstance().getReference("Foods");
@@ -79,6 +81,15 @@ public class BookingHistoryFragment extends Fragment {
                             roomMap.put(id, room);
                         }
 
+                movieDateRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot data : snapshot.getChildren()) {
+                            String id = data.getKey();
+                            String date = data.child("date").getValue(String.class);
+                            movieDateMap.put(id, date);
+                        }
+
                 showtimeRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -87,16 +98,6 @@ public class BookingHistoryFragment extends Fragment {
                             String time = data.child("time").getValue(String.class);
                             showtimeMap.put(id, time);
                         }
-
-//                        foodRef.addListenerForSingleValueEvent(new ValueEventListener() {
-//                            @Override
-//                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                                for (DataSnapshot data : snapshot.getChildren()) {
-//                                    String id = data.getKey();
-//                                    String name = data.child("name").getValue(String.class);
-//                                    foodMap.put(id, name);
-//                                }
-
                                 // Sau khi load xong map, load booking
                                 loadBookingsFromRealtime();
                             }
@@ -110,10 +111,10 @@ public class BookingHistoryFragment extends Fragment {
                 });
                     }
 
-//                    @Override
-//                    public void onCancelled(@NonNull DatabaseError error) {}
-//                });
-//            }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {}
+                });
+            }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {}
@@ -135,7 +136,7 @@ public class BookingHistoryFragment extends Fragment {
                             }
                         }
 
-                        adapter = new BookingHistoryAdapter(getContext(), bookingList, movieMap, showtimeMap, roomMap, foodMap);
+                        adapter = new BookingHistoryAdapter(getContext(), bookingList, movieMap, movieDateMap, showtimeMap, roomMap, foodMap);
                         recyclerView.setAdapter(adapter);
                     }
 

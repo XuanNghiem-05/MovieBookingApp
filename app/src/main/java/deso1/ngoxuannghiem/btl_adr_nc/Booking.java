@@ -16,6 +16,8 @@ public class Booking {
     private List<String> seats; // Thay vì: private String seat;
     private List<Food> foods;
     private String bookingTime;
+    private String movieDateId;
+
 
     public String getBookingTime() {
         return bookingTime;
@@ -23,6 +25,14 @@ public class Booking {
 
     public void setBookingTime(String bookingTime) {
         this.bookingTime = bookingTime;
+    }
+
+    public String getMovieDateId() {
+        return movieDateId;
+    }
+
+    public void setMovieDateId(String movieDateId) {
+        this.movieDateId = movieDateId;
     }
 
     public List<Food> getFoods() {
@@ -42,18 +52,19 @@ public class Booking {
     public Booking() {}
 
     // Constructor đầy đủ
-    public Booking(String id, String movieId, String roomId, String showtimeId, String seat,
-                   String foodId, int foodQuantity, String paymentMethod, int totalPrice,String userId) {
+    public Booking(String id, String movieId, String roomId, String showtimeId, List<String> seats,
+                   List<Food> foods, String paymentMethod, int totalPrice, String userId, String bookingTime, String movieDateId) {
         this.id = id;
         this.movieId = movieId;
         this.roomId = roomId;
         this.showtimeId = showtimeId;
-        this.seat = seat;
-        this.foodId = foodId;
-        this.foodQuantity = foodQuantity;
+        this.seats = seats;
+        this.foods = foods;
         this.paymentMethod = paymentMethod;
         this.totalPrice = totalPrice;
         this.userId = userId;
+        this.bookingTime = bookingTime;
+        this.movieDateId = movieDateId;
     }
 
     // Getter và Setter

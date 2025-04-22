@@ -68,7 +68,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupBanner() {
-        int[] banners = {R.drawable.langman, R.drawable.banner2, R.drawable.banner3, R.drawable.banner4};
+        int[] banners = {R.drawable.banner5, R.drawable.banner2, R.drawable.banner6, R.drawable.banner7};
         for (int banner : banners) {
             ImageView imageView = new ImageView(getContext());
             imageView.setImageResource(banner);

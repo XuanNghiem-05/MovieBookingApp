@@ -52,6 +52,42 @@
             android:hint="Link ảnh banner"
             android:inputType="textUri" />
 
+        <!-- Thêm các trường mới -->
+        <EditText
+            android:id="@+id/edtMovieVideo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Video URL"
+            android:inputType="textUri" />
+
+        <EditText
+            android:id="@+id/edtMovieDirector"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Đạo diễn"
+            android:inputType="text" />
+
+        <EditText
+            android:id="@+id/edtMovieCast"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Diễn viên"
+            android:inputType="textMultiLine" />
+
+        <EditText
+            android:id="@+id/edtMovieLanguage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Ngôn ngữ"
+            android:inputType="text" />
+
+        <EditText
+            android:id="@+id/edtMovieDuration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Thời lượng (phút)"
+            android:inputType="number" />
+
         <Spinner
             android:id="@+id/spnMovieCategory"
             android:layout_width="match_parent"

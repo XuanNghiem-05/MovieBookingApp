@@ -103,14 +103,20 @@ public class MovieFragment extends Fragment {
         EditText edtStartDate = view.findViewById(R.id.edtMovieStartDate);
         EditText edtImage = view.findViewById(R.id.edtMovieImage);
         EditText edtBanner = view.findViewById(R.id.edtMovieBanner);
+        EditText edtVideo = view.findViewById(R.id.edtMovieVideo);
         Spinner spnCategory = view.findViewById(R.id.spnMovieCategory);
+
+        // ✅ Thêm 4 EditText mới
+        EditText edtDuration = view.findViewById(R.id.edtMovieDuration);
+        EditText edtDirector = view.findViewById(R.id.edtMovieDirector);
+        EditText edtActors = view.findViewById(R.id.edtMovieCast);
+        EditText edtLanguage = view.findViewById(R.id.edtMovieLanguage);
 
         List<Category> categoryList = new ArrayList<>();
         ArrayAdapter<Category> spinnerAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, categoryList);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spnCategory.setAdapter(spinnerAdapter);
 
-        // Load categories từ Firebase
         FirebaseDatabase.getInstance().getReference("Categories")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -122,7 +128,6 @@ public class MovieFragment extends Fragment {
                         }
                         spinnerAdapter.notifyDataSetChanged();
 
-                        // Nếu đang sửa phim, set lại vị trí category trong spinner
                         if (movieToEdit != null) {
                             for (int i = 0; i < categoryList.size(); i++) {
                                 if (categoryList.get(i).id == movieToEdit.categoryId) {
@@ -146,6 +151,12 @@ public class MovieFragment extends Fragment {
             edtStartDate.setText(movieToEdit.startDate);
             edtImage.setText(movieToEdit.imageUrl);
             edtBanner.setText(movieToEdit.bannerUrl);
+            edtVideo.setText(movieToEdit.videoUrl);
+
+            edtDuration.setText(String.valueOf(movieToEdit.duration));
+            edtDirector.setText(movieToEdit.director);
+            edtActors.setText(movieToEdit.actors);
+            edtLanguage.setText(movieToEdit.language);
         }
 
         builder.setView(view);
@@ -157,13 +168,20 @@ public class MovieFragment extends Fragment {
             String startDate = edtStartDate.getText().toString();
             String image = edtImage.getText().toString();
             String banner = edtBanner.getText().toString();
+            String videoUrl = edtVideo.getText().toString();
+
+            int duration = Integer.parseInt(edtDuration.getText().toString());
+            String director = edtDirector.getText().toString();
+            String actors = edtActors.getText().toString();
+            String language = edtLanguage.getText().toString();
 
             int selectedIndex = spnCategory.getSelectedItemPosition();
             int categoryId = categoryList.get(selectedIndex).id;
 
             if (movieToEdit == null) {
                 String id = movieRef.push().getKey();
-                Movie newMovie = new Movie(id, name, description, price, startDate, image, banner, categoryId);
+                Movie newMovie = new Movie(id, name, description, price, startDate, image, banner, categoryId, videoUrl,
+                        director, actors, duration,  language);
                 movieRef.child(id).setValue(newMovie);
             } else {
                 movieToEdit.name = name;
@@ -172,6 +190,13 @@ public class MovieFragment extends Fragment {
                 movieToEdit.startDate = startDate;
                 movieToEdit.imageUrl = image;
                 movieToEdit.bannerUrl = banner;
+                movieToEdit.videoUrl = videoUrl;
+
+                movieToEdit.duration = duration;
+                movieToEdit.director = director;
+                movieToEdit.actors = actors;
+                movieToEdit.language = language;
+
                 movieToEdit.categoryId = categoryId;
                 movieRef.child(movieToEdit.id).setValue(movieToEdit);
             }

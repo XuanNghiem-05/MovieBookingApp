@@ -39,6 +39,12 @@
         android:text="Phòng: " />
 
     <TextView
+        android:id="@+id/tvMovieDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ngày chiếu: " />
+
+    <TextView
         android:id="@+id/tvShowTime"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

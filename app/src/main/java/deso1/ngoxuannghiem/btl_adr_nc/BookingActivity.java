@@ -22,6 +22,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -34,8 +36,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +49,7 @@ import java.util.Map;
 public class BookingActivity extends AppCompatActivity {
 
     TextView tvMovieName, tvMoviePrice, tvStartDate;
-    Spinner spinnerShowtime, spinnerFood;
+    Spinner spinnerShowtime, spinnerFood, spinnerMovieDate;
     RadioGroup radioGroupPayment;
     Button btnConfirmBooking;
     ImageButton btnBack;
@@ -56,6 +60,7 @@ public class BookingActivity extends AppCompatActivity {
     //String selectedSeat = "";
     private List<String> selectedSeats = new ArrayList<>();
     String selectedShowtime = "";
+    String selectedMovieDate = "";
     String selectedFood = "";
     String paymentMethod = "";
 
@@ -65,6 +70,9 @@ public class BookingActivity extends AppCompatActivity {
     private List<String> showtimeList = new ArrayList<>();
     private ArrayAdapter<String> showtimeAdapter;
     private List<Showtime> showtimeObjects = new ArrayList<>();
+    private List<MovieDate> movieDateObjects = new ArrayList<>();
+    private List<String> movieDates = new ArrayList<>();
+    private ArrayAdapter<String> movieDateAdapter;
 
     RecyclerView rvSeats;
     SeatAdapter seatAdapter;
@@ -75,6 +83,7 @@ public class BookingActivity extends AppCompatActivity {
 
     private String selectedMovieId;       // ID bộ phim đã chọn
     private String selectedShowtimeId;
+    private String selectedMovieDateId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +95,7 @@ public class BookingActivity extends AppCompatActivity {
         tvMoviePrice = findViewById(R.id.tvMoviePrice);
         tvStartDate = findViewById(R.id.tvStartDate);
         spinnerShowtime = findViewById(R.id.spinnerShowtime);
+        spinnerMovieDate = findViewById(R.id.spinnerMovieDate);
         //spinnerFood = findViewById(R.id.spinnerFood);
         rvFood = findViewById(R.id.rvFood);
         rvFood.setLayoutManager(new LinearLayoutManager(this));
@@ -107,12 +117,40 @@ public class BookingActivity extends AppCompatActivity {
         tvMoviePrice.setText("Giá vé: " + price + "đ");
         tvStartDate.setText("Khởi chiếu: " + startDate);
         // Giờ chiếu mẫu
+
         // KHỞI TẠO ADAPTER TRƯỚC!
         showtimeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, showtimeList);
         showtimeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerShowtime.setAdapter(showtimeAdapter);
         // Sau đó gọi hàm load dữ liệu
-        loadShowtimesFromFirebase();
+        //loadShowtimesFromFirebase();
+        loadMovieDatesFromFirebase();
+
+        // Set adapter với danh sách MovieDate
+         movieDateAdapter = new ArrayAdapter<>(BookingActivity.this, android.R.layout.simple_spinner_item, movieDates);
+        movieDateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerMovieDate.setAdapter(movieDateAdapter);
+
+        // Set listener sau khi adapter được set
+        spinnerMovieDate.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (!movieDateObjects.isEmpty()) {
+                    MovieDate selectedDate = movieDateObjects.get(position);
+                    selectedMovieDateId = selectedDate.getId();
+                    String selectedDateString = selectedDate.getDate();
+
+                    Log.e("SelectedDate", "ID: " + selectedMovieDateId + ", Date: " + selectedDateString);
+                    loadShowtimesFromFirebase(selectedDateString);
+                    // Gọi các hàm cần dùng ID tại đây
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Không chọn gì
+            }
+        });
 
         spinnerShowtime.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -123,7 +161,6 @@ public class BookingActivity extends AppCompatActivity {
                 // Lấy ID của giờ chiếu đã chọn
                 selectedShowtimeId = selectedShowtime.getId();  // Lấy ID từ đối tượng Showtime
                 // Optional: Bạn có thể làm thêm việc gì đó nếu cần với selectedShowtimeId hoặc other properties
-
                 resetSeatGrid();
 
                 // Load ghế đã đặt
@@ -135,15 +172,6 @@ public class BookingActivity extends AppCompatActivity {
                 // Xử lý nếu không có lựa chọn nào được chọn (thường không cần thiết)
             }
         });
-        // Đồ ăn mẫu
-//        ArrayAdapter<String> foodAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
-//        spinnerFood.setAdapter(foodAdapter);
-
-
-//        List<Food> foodList = new ArrayList<>();
-//// Lấy danh sách từ Firebase và thêm vào foodList
-//        FoodOrderAdapter adapter = new FoodOrderAdapter(foodList);
-//        rvFood.setAdapter(adapter);
         foodList = new ArrayList<>();
         foodOrderAdapter = new FoodOrderAdapter(foodList);
 
@@ -155,9 +183,6 @@ public class BookingActivity extends AppCompatActivity {
         loadFoodData1(foodOrderAdapter);
         loadFoodData();
 
-        // Tạo ghế ngồi (A1 - E5)
-        //createSeats(5, 5);
-
         // Nút quay lại
         btnBack.setOnClickListener(view -> finish());
 
@@ -165,7 +190,7 @@ public class BookingActivity extends AppCompatActivity {
         btnConfirmBooking.setOnClickListener(view -> {
             Log.d("DEBUG", "Foodlll: " + foodList);
             selectedShowtime = spinnerShowtime.getSelectedItem().toString();
-
+            selectedMovieDate = spinnerMovieDate.getSelectedItem().toString();
             List<Food> selectedFoods = getSelectedFoods();
             Log.d("DEBUG", "Foodsele: " + selectedFoods);
 
@@ -197,11 +222,13 @@ public class BookingActivity extends AppCompatActivity {
                     foodName,
                     paymentMethod,
                     price,
-                    selectedFoods
+                    selectedFoods,
+                    selectedMovieDateId
             );
         });
     }
-    private void loadShowtimesFromFirebase() {
+
+    private void loadShowtimesFromFirebase(String selectedMovieDateString) {
         DatabaseReference showtimeRef = FirebaseDatabase.getInstance().getReference("Showtimes");
 
         showtimeRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -210,11 +237,26 @@ public class BookingActivity extends AppCompatActivity {
                 showtimeList.clear();
                 showtimeObjects.clear();
 
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+                String currentTimeStr = sdf.format(new Date());
+
                 for (DataSnapshot showtimeSnap : snapshot.getChildren()) {
                     Showtime showtime = showtimeSnap.getValue(Showtime.class);
-                    if (showtime != null && showtime.getTime() != null) {
-                        showtimeObjects.add(showtime); // Nếu cần lưu id để xử lý sau
-                        showtimeList.add(showtime.getTime()); // Dùng time để hiển thị
+                    if (showtime != null && showtime.getTime() != null && selectedMovieDateString != null) {
+                        try {
+                            // Ghép ngày và giờ lại
+                            String fullShowtime = selectedMovieDateString + " " + showtime.getTime();
+                            Date showtimeDateTime = sdf.parse(fullShowtime);
+                            Date currentDateTime = sdf.parse(currentTimeStr);
+
+                            // So sánh thời gian
+                            if (showtimeDateTime != null && showtimeDateTime.after(currentDateTime)) {
+                                showtimeObjects.add(showtime);
+                                showtimeList.add(showtime.getTime());
+                            }
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
 
@@ -226,6 +268,65 @@ public class BookingActivity extends AppCompatActivity {
                 Toast.makeText(BookingActivity.this, "Lỗi tải giờ chiếu: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void loadMovieDatesFromFirebase() {
+        DatabaseReference movieDatesRef = FirebaseDatabase.getInstance().getReference("MovieDates");
+
+        movieDatesRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                movieDates.clear();
+                movieDateObjects.clear();
+
+                // Lấy ngày hiện tại
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                String currentDateStr = sdf.format(new Date()); // Lấy ngày hiện tại dưới dạng chuỗi yyyy-MM-dd
+
+                for (DataSnapshot dateSnap : snapshot.getChildren()) {
+                    MovieDate movieDate = dateSnap.getValue(MovieDate.class);
+                    if (movieDate != null && movieDate.getDate() != null) {
+                        // Kiểm tra nếu ngày chiếu không nhỏ hơn ngày hiện tại
+                        if (movieDate.getDate().compareTo(currentDateStr) >= 0) {
+                            // Thêm thứ vào ngày chiếu
+                            String dayOfWeek = getDayOfWeek(movieDate.getDate()); // Lấy thứ trong tuần từ ngày
+                            //movieDate.setDayOfWeek(dayOfWeek);  // Lưu lại thứ cho mỗi ngày chiếu
+
+                            movieDateObjects.add(movieDate);
+                            movieDates.add(movieDate.getDate() + " (" + dayOfWeek + ")"); // Cập nhật danh sách ngày chiếu với thứ
+                        }
+                    }
+                }
+                movieDateAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(BookingActivity.this, "Không thể tải ngày chiếu", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // Hàm để lấy thứ trong tuần từ ngày (yyyy-MM-dd)
+    private String getDayOfWeek(String dateStr) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            Date date = sdf.parse(dateStr);
+
+            // Lấy giá trị ngày trong tuần từ đối tượng Date
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK); // Giá trị ngày trong tuần từ 1 đến 7 (Chủ nhật = 1)
+
+            // Mảng chứa tên thứ trong tuần bằng tiếng Việt
+            String[] daysOfWeekInVietnamese = {"Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"};
+
+            // Trả về tên thứ trong tuần bằng tiếng Việt
+            return daysOfWeekInVietnamese[dayOfWeek - 1]; // Lấy tên thứ, trừ 1 vì chủ nhật có giá trị là 1
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return ""; // Trả về chuỗi rỗng nếu có lỗi
+        }
     }
 
     private void generateSeatGrid() {
@@ -303,7 +404,7 @@ public class BookingActivity extends AppCompatActivity {
 
     private void showConfirmationDialog(String movieName, String startDate, String roomName,
                                         String showtime, List<String> selectedSeats,
-                                        String foodName, String paymentMethod,double ticketPrice, List<Food> selectedFoods) {
+                                        String foodName, String paymentMethod,double ticketPrice, List<Food> selectedFoods, String movieDate) {
 
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_booking_confirmation, null);
         AlertDialog dialog = new AlertDialog.Builder(this)
@@ -324,9 +425,10 @@ public class BookingActivity extends AppCompatActivity {
         ((TextView) dialogView.findViewById(R.id.tvTicketCount)).setText("Số lượng vé: " + selectedSeats.size());
         ((TextView) dialogView.findViewById(R.id.tvFood)).setText("Đồ ăn/Đồ uống: " + foodName);
         ((TextView) dialogView.findViewById(R.id.tvPayment)).setText("Phương thức thanh toán: " + paymentMethod);
+        ((TextView) dialogView.findViewById(R.id.tvMovieDate)).setText("Ngày chiếu: " + selectedMovieDate);
 
         // Calculate total price
-// Load dữ liệu từ Firebase
+        // Load dữ liệu từ Firebase
         Log.d("DEBUG", "sl: " + foodList);
         double ticketTotal = ticketPrice * selectedSeats.size();
         double foodTotal = 0;
@@ -350,7 +452,7 @@ public class BookingActivity extends AppCompatActivity {
 
         btnConfirm.setOnClickListener(v -> {
             // Thực hiện lưu Booking vào Firebase tại đây
-            saveBookingToFirebase(selectedMovieId, selectedShowtimeId,roomId, selectedSeats, selectedFoods, paymentMethod, totalPrice);
+            saveBookingToFirebase(selectedMovieId, selectedShowtimeId, selectedMovieDateId ,roomId, selectedSeats, selectedFoods, paymentMethod, totalPrice);
             dialog.dismiss();
         });
 
@@ -463,7 +565,7 @@ public class BookingActivity extends AppCompatActivity {
     }
 
     // Sau khi xác nhận thì thêm dữ liệu vào bảng booking
-    private void saveBookingToFirebase(String movieId, String showtimeId, String roomId, List<String> selectedSeats, List<Food> selectedFoods, String paymentMethod, double totalPrice) {
+    private void saveBookingToFirebase(String movieId, String showtimeId, String movieDateId, String roomId, List<String> selectedSeats, List<Food> selectedFoods, String paymentMethod, double totalPrice) {
         DatabaseReference bookingsRef = FirebaseDatabase.getInstance().getReference("Bookings");
         String bookingId = bookingsRef.push().getKey(); // Tạo id tự động
         if (bookingId == null) return;
@@ -478,6 +580,7 @@ public class BookingActivity extends AppCompatActivity {
 
         Map<String, Object> bookingData = new HashMap<>();
         bookingData.put("movieId", movieId);
+        bookingData.put("movieDateId", movieDateId);
         bookingData.put("showtimeId", showtimeId);
         bookingData.put("roomId", roomId);
         bookingData.put("seats", selectedSeats);
@@ -504,8 +607,21 @@ public class BookingActivity extends AppCompatActivity {
         bookingData.put("foods", foods);
 
         bookingsRef.child(bookingId).setValue(bookingData)
-                .addOnSuccessListener(aVoid -> Toast.makeText(BookingActivity.this, "Đặt vé thành công!", Toast.LENGTH_SHORT).show())
-                .addOnFailureListener(e -> Toast.makeText(BookingActivity.this, "Lỗi đặt vé: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(BookingActivity.this, "Đặt vé thành công!", Toast.LENGTH_SHORT).show();
+
+                    // ✅ Cập nhật số lượng món ăn sau khi đặt vé thành công
+                    updateFoodQuantities(selectedFoods);
+                    Intent intent = new Intent(BookingActivity.this, UserMainActivity.class);
+                    intent.putExtra("navigateTo", "home"); // Truyền dữ liệu để điều hướng đến HomeFragment
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP); // Xoá stack nếu cần
+                    startActivity(intent);
+                    finish();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(BookingActivity.this, "Lỗi đặt vé: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                );
+
     }
 
     private void loadBookedSeats(String movieId, String showtimeId) {
@@ -561,6 +677,27 @@ public class BookingActivity extends AppCompatActivity {
                 seatView.setEnabled(true);
                 seatView.setBackgroundResource(R.drawable.bg_seat_unselected);
                 seatView.setTextColor(Color.BLACK);
+            }
+        }
+    }
+
+    // hàm cập nhật số lượng đồ ăn
+    private void updateFoodQuantities(List<Food> selectedFoods) {
+        DatabaseReference foodRef = FirebaseDatabase.getInstance().getReference("Foods");
+
+        for (Food food : selectedFoods) {
+            int selectedQuantity = food.getSelectedQuantity();
+            if (selectedQuantity > 0) {
+                String foodId = food.getId();
+                int currentQuantity = food.getQuantity();
+
+                int newQuantity = currentQuantity - selectedQuantity;
+
+                if (newQuantity < 0) newQuantity = 0; // Không âm
+
+                foodRef.child(foodId).child("quantity").setValue(newQuantity)
+                        .addOnSuccessListener(aVoid -> Log.d("UPDATE_FOOD", "Đã cập nhật " + food.getName()))
+                        .addOnFailureListener(e -> Log.e("UPDATE_FOOD", "Lỗi khi cập nhật " + food.getName(), e));
             }
         }
     }

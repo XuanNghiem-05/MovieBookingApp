@@ -10,16 +10,18 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:gravity="center_vertical">
 
-        <!-- Ảnh phim -->
+        <!-- Ảnh phim (to hơn) -->
         <ImageView
             android:id="@+id/imgMovie"
             android:layout_width="0dp"
-            android:layout_height="120dp"
-            android:layout_weight="1"
-            android:scaleType="centerCrop"
-            android:layout_marginEnd="8dp" />
+            android:layout_height="140dp"
+            android:layout_weight="2"
+        android:scaleType="centerCrop"
+        android:layout_marginEnd="8dp" />
 
         <!-- Thông tin phim (3 phần: tên, giá, khởi chiếu) -->
         <LinearLayout
@@ -53,29 +55,34 @@
                 android:textSize="14sp"
                 android:textColor="#444" />
         </LinearLayout>
-    </LinearLayout>
 
-    <!-- Nút Sửa / Xoá -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:orientation="horizontal"
-        android:gravity="end">
-
-        <Button
-            android:id="@+id/btnEditMovie"
+        <!-- 2 nút thao tác (nhỏ gọn) -->
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sửa" />
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginStart="8dp">
 
-        <Button
-            android:id="@+id/btnDeleteMovie"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Xoá"
-            android:layout_marginStart="8dp"
-            android:textColor="#FF0000" />
+            <Button
+                android:id="@+id/btnEditMovie"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sửa"
+                android:minWidth="60dp"
+                android:textSize="12sp"
+                android:padding="4dp" />
+
+            <Button
+                android:id="@+id/btnDeleteMovie"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Xoá"
+                android:textColor="#FF0000"
+                android:minWidth="60dp"
+                android:textSize="12sp"
+                android:padding="4dp"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
     </LinearLayout>
-
 </LinearLayout>

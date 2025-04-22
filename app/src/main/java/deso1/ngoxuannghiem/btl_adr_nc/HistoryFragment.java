@@ -94,7 +94,7 @@ public class HistoryFragment extends Fragment {
         List<Booking> filteredList = new ArrayList<>();
         for (Booking booking : bookingList) {
             // Lọc theo mã vé (id)
-            if (booking.getId().toLowerCase().contains(query.toLowerCase())) {
+            if (booking.getBookingTime().toLowerCase().contains(query.toLowerCase())) {
                 filteredList.add(booking);
             }
         }

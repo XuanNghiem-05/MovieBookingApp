@@ -53,6 +53,18 @@
         android:layout_marginTop="2dp"
         android:text="Khởi chiếu: " />
 
+        <!-- Ngày chiếu chiếu -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Chọn ngày chiếu"
+            android:layout_marginTop="16dp"/>
+
+        <Spinner
+            android:id="@+id/spinnerMovieDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
     <!-- Giờ chiếu -->
     <TextView
         android:layout_width="match_parent"
